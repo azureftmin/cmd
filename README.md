@@ -1,2 +1,2 @@
 # cmd
-**便利なコマンドをリリースしたので、リリースから見てください**
+**Release**https://github.com/azureftmin/cmd/releases/tag/cmd
