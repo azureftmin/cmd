@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="ja"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -46,8 +47,6 @@
             <p class="text-slate-300 text-sm sm:text-base leading-relaxed mb-4">
                 Windowsで「管理者として実行」が許可されていない環境（学校・職場のPCや制限アカウント）でも、自分専用の独立した開発用SSHサーバー（<code class="bg-slate-800 text-indigo-300 px-1.5 py-0.5 rounded border border-slate-700">sshd</code>）を立ち上げるためのステップバイステップガイドです。
             </p>
-            <!-- Download Button in Banner -->
-            
         </section>
 
         <!-- Prerequisites & Mechanics -->
@@ -70,7 +69,7 @@
                 </div>
                 <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-4">
                     <div class="text-indigo-400 font-bold mb-1 flex items-center gap-2">
-                        <i class="fa-solid fa-[#file-code]"></i> 設定をシンプル化
+                        <i class="fa-solid fa-file-code"></i> 設定をシンプル化
                     </div>
                     <p class="text-xs text-slate-400">管理者グループ専用設定やエラーの原因となるコメント文を排除したクリーンな設定ファイルを使います。</p>
                 </div>
@@ -83,31 +82,41 @@
                 2. 実装手順（コマンドプロンプトで実行）
             </h2>
 
-            <!-- Download Link Notice Card -->
-            <div class="bg-indigo-950/40 border border-indigo-500/30 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                <div class="flex items-center gap-3">
-                    <div class="p-2 bg-indigo-500/20 text-indigo-400 rounded-lg">
-                        <i class="fa-solid fa-download text-lg"></i>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-sm text-white">事前準備: OpenSSH-Win64 の入手</h4>
-                        <p class="text-xs text-slate-400">まだOpenSSHを入手していない場合は、GitHubの公式リリースから最新版のzipファイル（例: OpenSSH-Win64.zip）をダウンロードして解凍してください。</p>
-                    </div>
-                </div>
-                <a href="https://github.com/PowerShell/Win32-OpenSSH/releases" target="_blank" rel="noopener noreferrer" class="whitespace-nowrap text-xs bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-3 py-2 rounded-md transition-colors flex items-center gap-1.5">
-                    <span>GitHub Releaseへ</span>
-                    <i class="fa-solid fa-external-link-alt text-[10px]"></i>
-                </a>
-            </div>
-
-            <!-- Step 1 -->
-            <div class="bg-slate-800/40 border border-slate-700 rounded-xl p-5 space-y-3">
+            <!-- Step 1: OpenSSH Download & Directory Creation (Enhanced GitHub Link) -->
+            <div class="bg-slate-800/40 border border-indigo-500/50 rounded-xl p-5 space-y-4 shadow-lg">
                 <div class="flex items-center gap-3">
                     <span class="bg-indigo-600 text-white font-bold w-7 h-7 rounded-full flex items-center justify-center text-sm">1</span>
-                    <h3 class="font-bold text-white">フォルダの作成</h3>
+                    <h3 class="font-bold text-white text-base">OpenSSHのダウンロードと解凍・フォルダ作成</h3>
                 </div>
-                <p class="text-xs text-slate-400">暗号鍵用と設定保存用のフォルダを作ります。パスにスペースが含まれても崩れないよう引用符で囲みます。</p>
-                <div class="bg-slate-950 rounded-lg p-3 border border-slate-800 text-xs text-emerald-400 overflow-x-auto">
+                <p class="text-xs text-slate-300 leading-relaxed">
+                    まずは公式の配布ページから <code class="text-indigo-300">OpenSSH-Win64.zip</code> をダウンロードし、<code class="text-emerald-400 font-bold">C:\fjuty</code> に解凍してください（解凍後に <code class="text-indigo-300">C:\fjuty\OpenSSH-Win64</code> が作成されます）。
+                </p>
+
+                <!-- Highly Prominent GitHub Download Banner / Button -->
+                <div class="bg-gradient-to-r from-indigo-900/80 to-slate-900 border-2 border-indigo-500 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
+                    <div class="flex items-center gap-3">
+                        <div class="p-3 bg-indigo-600 text-white rounded-xl shadow-md animate-pulse">
+                            <i class="fa-solid fa-cloud-arrow-down text-xl"></i>
+                        </div>
+                        <div>
+                            <div class="font-bold text-sm text-white flex items-center gap-1.5">
+                                <span>PowerShell/Win32-OpenSSH</span>
+                                <span class="bg-emerald-500/20 text-emerald-400 text-[10px] px-2 py-0.5 rounded border border-emerald-500/30 font-semibold">公式最新版</span>
+                            </div>
+                            <p class="text-xs text-slate-300 mt-0.5">ここからZIPファイルをダウンロードして <code class="text-emerald-300 font-bold">C:\fjuty</code> に展開してください。</p>
+                        </div>
+                    </div>
+                    <a href="https://github.com/PowerShell/Win32-OpenSSH/releases" target="_blank" rel="noopener noreferrer" class="whitespace-nowrap bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs px-5 py-2.5 rounded-lg transition-all shadow-lg hover:shadow-indigo-500/25 flex items-center gap-2">
+                        <i class="fa-solid fa-download"></i>
+                        <span>GitHub Releasesを開く</span>
+                        <i class="fa-solid fa-external-link-alt text-[10px] opacity-75"></i>
+                    </a>
+                </div>
+
+                <p class="text-xs text-slate-400 pt-1">
+                    続いて、以下のコマンドを実行して暗号鍵用と設定保存用のフォルダを作成します。
+                </p>
+                <div class="bg-slate-950 rounded-lg p-3 border border-slate-800 text-xs text-emerald-400 overflow-x-auto space-y-1">
                     <code>mkdir C:\fjuty\keys</code><br>
                     <code>mkdir "%USERPROFILE%\ssh_config"</code>
                 </div>
@@ -232,6 +241,5 @@ Subsystem sftp sftp-server.exe</pre>
     <footer class="mt-16 text-center text-xs text-slate-500">
         OpenSSH User-Mode Setup Manual • Generated for Easy Sharing
     </footer>
-
 
 </body></html>
