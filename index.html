@@ -45,9 +45,17 @@
             <h2 class="text-xl sm:text-2xl font-bold text-white mb-3 flex items-center gap-2">
                 <i class="fa-solid fa-lightbulb text-amber-400"></i> このガイドについて
             </h2>
-            <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+            <p class="text-slate-300 text-sm sm:text-base leading-relaxed mb-4">
                 Windowsで「管理者として実行」が許可されていない環境（学校・職場のPCや制限アカウント）でも、自分専用の独立した開発用SSHサーバー（<code class="bg-slate-800 text-indigo-300 px-1.5 py-0.5 rounded border border-slate-700">sshd</code>）を立ち上げるためのステップバイステップガイドです。
             </p>
+            <!-- Download Button in Banner -->
+            <div class="pt-2">
+                <a href="https://github.com/PowerShell/Win32-OpenSSH/releases" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs sm:text-sm px-4 py-2.5 rounded-lg transition-all shadow-lg hover:shadow-indigo-500/25">
+                    <i class="fa-brands fa-github text-base"></i>
+                    <span>OpenSSH (Win32-OpenSSH) 公式ダウンロードページを開く</span>
+                    <i class="fa-solid fa-arrow-up-right-from-square text-xs opacity-70"></i>
+                </a>
+            </div>
         </section>
 
         <!-- Prerequisites & Mechanics -->
@@ -82,6 +90,23 @@
             <h2 class="text-lg font-bold text-slate-200 border-l-4 border-indigo-500 pl-3">
                 2. 実装手順（コマンドプロンプトで実行）
             </h2>
+
+            <!-- Download Link Notice Card -->
+            <div class="bg-indigo-950/40 border border-indigo-500/30 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-indigo-500/20 text-indigo-400 rounded-lg">
+                        <i class="fa-solid fa-download text-lg"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-sm text-white">事前準備: OpenSSH-Win64 の入手</h4>
+                        <p class="text-xs text-slate-400">まだOpenSSHを入手していない場合は、GitHubの公式リリースから zip ファイル（例: OpenSSH-Win64.zip）をダウンロードして解凍してください。</p>
+                    </div>
+                </div>
+                <a href="https://github.com/PowerShell/Win32-OpenSSH/releases" target="_blank" rel="noopener noreferrer" class="whitespace-nowrap text-xs bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-3 py-2 rounded-md transition-colors flex items-center gap-1.5">
+                    <span>GitHub Releaseへ</span>
+                    <i class="fa-solid fa-external-link-alt text-[10px]"></i>
+                </a>
+            </div>
 
             <!-- Step 1 -->
             <div class="bg-slate-800/40 border border-slate-700 rounded-xl p-5 space-y-3">
