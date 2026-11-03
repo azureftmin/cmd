@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理者権限なしで動かすOpenSSHサーバー設定ガイド</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600&family=Noto+Sans+JP:wght@400;500;700&display=swap');
+        body {
+            font-family: 'Noto Sans JP', 'Inter', sans-serif;
+        }
+        code, pre {
+            font-family: 'JetBrains Mono', monospace;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen pb-16">
+
+    <!-- Header -->
+    <header class="border-b border-slate-800 bg-slate-950/80 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-indigo-600 rounded-lg text-white">
+                    <i class="fa-solid fa-terminal text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight text-white">OpenSSH User-Mode Setup</h1>
+                    <p class="text-xs text-slate-400">管理者権限なしでのSSHサーバー構築ガイド</p>
+                </div>
+            </div>
+            <span class="text-xs bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-3 py-1 rounded-full font-semibold">
+                Windows 10 / 11 対応
+            </span>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto px-4 mt-8 space-y-8">
+
+        <!-- Intro Banner -->
+        <section class="bg-gradient-to-br from-indigo-950/60 to-slate-900 border border-indigo-500/30 rounded-2xl p-6 sm:p-8 shadow-xl">
+            <h2 class="text-xl sm:text-2xl font-bold text-white mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-lightbulb text-amber-400"></i> このガイドについて
+            </h2>
+            <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+                Windowsで「管理者として実行」が許可されていない環境（学校・職場のPCや制限アカウント）でも、自分専用の独立した開発用SSHサーバー（<code class="bg-slate-800 text-indigo-300 px-1.5 py-0.5 rounded border border-slate-700">sshd</code>）を立ち上げるためのステップバイステップガイドです。
+            </p>
+        </section>
+
+        <!-- Prerequisites & Mechanics -->
+        <section class="space-y-4">
+            <h2 class="text-lg font-bold text-slate-200 border-l-4 border-indigo-500 pl-3">
+                1. なぜ権限なしで動くのか？（全体の仕組み）
+            </h2>
+            <div class="grid sm:grid-cols-3 gap-4">
+                <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-4">
+                    <div class="text-indigo-400 font-bold mb-1 flex items-center gap-2">
+                        <i class="fa-solid fa-network-wired"></i> ポートを変更
+                    </div>
+                    <p class="text-xs text-slate-400">標準のPort 22ではなく、一般ユーザーでも解放可能なPort 2222などのハイポートを使用します。</p>
+                </div>
+                <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-4">
+                    <div class="text-indigo-400 font-bold mb-1 flex items-center gap-2">
+                        <i class="fa-solid fa-key"></i> 鍵の保存先を変更
+                    </div>
+                    <p class="text-xs text-slate-400">書き込み権限がない ProgramData を避け、ユーザーフォルダや C:\fjuty 内にホスト鍵を作成します。</p>
+                </div>
+                <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-4">
+                    <div class="text-indigo-400 font-bold mb-1 flex items-center gap-2">
+                        <i class="fa-solid fa-[#file-code]"></i> 設定をシンプル化
+                    </div>
+                    <p class="text-xs text-slate-400">管理者グループ専用設定やエラーの原因となるコメント文を排除したクリーンな設定ファイルを使います。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Step by Step Setup -->
+        <section class="space-y-6">
+            <h2 class="text-lg font-bold text-slate-200 border-l-4 border-indigo-500 pl-3">
+                2. 実装手順（コマンドプロンプトで実行）
+            </h2>
+
+            <!-- Step 1 -->
+            <div class="bg-slate-800/40 border border-slate-700 rounded-xl p-5 space-y-3">
+                <div class="flex items-center gap-3">
+                    <span class="bg-indigo-600 text-white font-bold w-7 h-7 rounded-full flex items-center justify-center text-sm">1</span>
+                    <h3 class="font-bold text-white">フォルダの作成</h3>
+                </div>
+                <p class="text-xs text-slate-400">暗号鍵用と設定保存用のフォルダを作ります。パスにスペースが含まれても崩れないよう引用符で囲みます。</p>
+                <div class="bg-slate-950 rounded-lg p-3 border border-slate-800 text-xs text-emerald-400 overflow-x-auto">
+                    <code>mkdir C:\fjuty\keys</code><br>
+                    <code>mkdir "%USERPROFILE%\ssh_config"</code>
+                </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="bg-slate-800/40 border border-slate-700 rounded-xl p-5 space-y-3">
+                <div class="flex items-center gap-3">
+                    <span class="bg-indigo-600 text-white font-bold w-7 h-7 rounded-full flex items-center justify-center text-sm">2</span>
+                    <h3 class="font-bold text-white">ホスト鍵（暗号鍵）の個別手動生成</h3>
+                </div>
+                <p class="text-xs text-slate-400"><code class="text-indigo-300">-A</code> オプションは管理者領域を参照してエラーになるため、パスフレーズなし（<code class="text-indigo-300">-N ""</code>）で個別に直接指定して生成します。</p>
+                <div class="bg-slate-950 rounded-lg p-3 border border-slate-800 text-xs text-emerald-400 overflow-x-auto space-y-1">
+                    <code>C:\fjuty\OpenSSH-Win64\ssh-keygen.exe -t ed25519 -f C:\fjuty\keys\ssh_host_ed25519_key -N ""</code><br>
+                    <code>C:\fjuty\OpenSSH-Win64\ssh-keygen.exe -t rsa -b 2048 -f C:\fjuty\keys\ssh_host_rsa_key -N ""</code>
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="bg-slate-800/40 border border-slate-700 rounded-xl p-5 space-y-3">
+                <div class="flex items-center gap-3">
+                    <span class="bg-indigo-600 text-white font-bold w-7 h-7 rounded-full flex items-center justify-center text-sm">3</span>
+                    <h3 class="font-bold text-white">sshd_config の作成・編集</h3>
+                </div>
+                <p class="text-xs text-slate-400">メモ帳で設定ファイルを開きます。</p>
+                <div class="bg-slate-950 rounded-lg p-3 border border-slate-800 text-xs text-emerald-400 overflow-x-auto">
+                    <code>notepad "%USERPROFILE%\ssh_config\sshd_config"</code>
+                </div>
+                <p class="text-xs text-slate-400">メモ帳が開いたら、下のセクション【3. 正確な sshd_config テキスト】の内容を全選択してコピー＆ペーストし、上書き保存（Ctrl + S）して閉じます。</p>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="bg-slate-800/40 border border-slate-700 rounded-xl p-5 space-y-3">
+                <div class="flex items-center gap-3">
+                    <span class="bg-indigo-600 text-white font-bold w-7 h-7 rounded-full flex items-center justify-center text-sm">4</span>
+                    <h3 class="font-bold text-white">sshd サーバーの起動</h3>
+                </div>
+                <p class="text-xs text-slate-400">作成した設定ファイルを絶対パスで指定し、デバッグモード（`-d`）で起動します。</p>
+                <div class="bg-slate-950 rounded-lg p-3 border border-slate-800 text-xs text-emerald-400 overflow-x-auto">
+                    <code>C:\fjuty\OpenSSH-Win64\sshd.exe -f "%USERPROFILE%\ssh_config\sshd_config" -d</code>
+                </div>
+                <div class="bg-emerald-950/40 border border-emerald-500/30 rounded-lg p-3 text-xs text-emerald-300 flex items-start gap-2">
+                    <i class="fa-solid fa-circle-check text-base mt-0.5"></i>
+                    <div>
+                        <span class="font-bold">成功判定:</span><br>
+                        画面の最後に <code>Server listening on 0.0.0.0 port 2222.</code> と表示され、ログが止まれば正常に受け付け待機状態になっています。
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- sshd_config File Content -->
+        <section class="space-y-4">
+            <div class="flex items-center justify-between">
+                <h2 class="text-lg font-bold text-slate-200 border-l-4 border-indigo-500 pl-3">
+                    3. 正確な sshd_config テキスト
+                </h2>
+                <span class="text-xs text-slate-400">※コメント文を除去したエラーレス構成</span>
+            </div>
+
+            <div class="relative bg-slate-950 rounded-xl border border-slate-800 p-4 font-mono text-xs text-slate-300 overflow-x-auto">
+<pre>Port 2222
+
+HostKey C:/fjuty/keys/ssh_host_rsa_key
+HostKey C:/fjuty/keys/ssh_host_ed25519_key
+
+SyslogFacility AUTH
+LogLevel INFO
+
+LoginGraceTime 2m
+PermitRootLogin prohibit-password
+StrictModes yes
+MaxAuthTries 6
+MaxSessions 10
+
+PubkeyAuthentication yes
+AuthorizedKeysFile .ssh/authorized_keys
+
+PasswordAuthentication yes
+PermitEmptyPasswords no
+
+AllowAgentForwarding yes
+AllowTcpForwarding yes
+GatewayPorts no
+PermitTTY yes
+PrintMotd yes
+PrintLastLog yes
+TCPKeepAlive yes
+
+Subsystem sftp sftp-server.exe</pre>
+            </div>
+        </section>
+
+        <!-- FAQ for Friends -->
+        <section class="space-y-4">
+            <h2 class="text-lg font-bold text-slate-200 border-l-4 border-indigo-500 pl-3">
+                4. 友達に質問された時の解説集（FAQ）
+            </h2>
+
+            <div class="space-y-3">
+                <div class="bg-slate-800/30 border border-slate-700/50 rounded-xl p-4 space-y-1">
+                    <h3 class="text-sm font-bold text-indigo-300">Q. なぜ `sshd start` や `net start sshd` が使えないの？</h3>
+                    <p class="text-xs text-slate-400">`net start` はWindowsの「サービス」機能を利用するためのコマンドで、管理者権限が必須です。今回のように `sshd.exe` を直接絶対パスで指定して起動することで、一般ユーザー権限のまま単体アプリとして動作させることができます。</p>
+                </div>
+
+                <div class="bg-slate-800/30 border border-slate-700/50 rounded-xl p-4 space-y-1">
+                    <h3 class="text-sm font-bold text-indigo-300">Q. なぜ HostKey のパス区切りはスラッシュ (`/`) なの？</h3>
+                    <p class="text-xs text-slate-400">OpenSSHは元々UNIX系OS向けに作られており、Windows版でも設定ファイル内ではバックスラッシュ (`\`) よりもスラッシュ (`/`) を使う方がエスケープ文字のエラー（文字化けや認識失敗）を防げるためです。</p>
+                </div>
+
+                <div class="bg-slate-800/30 border border-slate-700/50 rounded-xl p-4 space-y-1">
+                    <h3 class="text-sm font-bold text-indigo-300">Q. 実際に接続できるかテストする方法は？</h3>
+                    <p class="text-xs text-slate-400">別のコマンドプロンプトを開き、以下のコマンドを実行します。<br>
+                    <code class="text-emerald-400 bg-slate-950 px-2 py-1 rounded border border-slate-800 inline-block mt-1">ssh ユーザー名@localhost -p 2222</code><br>
+                    パスワードが求められれば正常に接続できています。</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="mt-16 text-center text-xs text-slate-500">
+        OpenSSH User-Mode Setup Manual &bull; Generated for Easy Sharing
+    </footer>
+
+</body>
+</html>
